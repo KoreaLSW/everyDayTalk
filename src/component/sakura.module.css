@@ -1,0 +1,32 @@
+@keyframes fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.sakura {
+  position: absolute;
+  top: -10vh;
+  background-color: #ffb7c5; /* 벚꽃 색상 */
+  width: 30px;
+  height: 30px;
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  ); /* 벚꽃 꽃잎 모양 */
+  opacity: 0.7;
+  animation: fall linear infinite;
+}
