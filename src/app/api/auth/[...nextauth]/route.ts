@@ -6,8 +6,8 @@ export const authOptions: NextAuthOptions = {
   providers: [
     // Google 로그인만 유지
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: process.env.GOOGLE_CLIENT_ID as "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as "",
     }),
   ],
   pages: {
