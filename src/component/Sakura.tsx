@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import style from "./Sakura.module.css";
+import style from "./sakura.module.css";
 
 const NUM_BLOSSOMS = 30; // 생성할 벚꽃 개수 증가
 
