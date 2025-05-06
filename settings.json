@@ -1,0 +1,24 @@
+{
+  "editor.tokenColorCustomizations": {
+    "comments": "#6D7380", // 회색 주석
+    "strings": "#D19A5E", // 더 어두운 주황빛 문자열 (변경됨)
+    "keywords": "#C679DD", // 보라색 키워드
+    "functions": "#E5C07B", // 베이지색 함수
+    "numbers": "#56B6C2", // 청록색 숫자
+    "variables": "#98C379", // 연두색 변수
+    "textMateRules": [
+      {
+        "scope": "punctuation",
+        "settings": {
+          "foreground": "#ABB2BF" // 괄호, 콤마 등의 구두점
+        }
+      },
+      {
+        "scope": "storage.type",
+        "settings": {
+          "foreground": "#C679DD" // const, let 등의 타입 선언
+        }
+      }
+    ]
+  }
+}

@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Home, Book, MessageSquare, Video } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
   { id: "", label: "홈", icon: <Home /> },
@@ -22,8 +23,16 @@ const menuItems = [
   },
   { id: "zoom", label: "줌 교육", icon: <Video /> },
 ];
+
 export default function Navbar() {
-  const [activeTab, setActiveTab] = useState("home");
+  const [activeTab, setActiveTab] = useState("");
+  const pathname = usePathname();
+
+  // URL 경로가 변경될 때마다 activeTab 업데이트
+  useEffect(() => {
+    const path = pathname.split("/")[1]; // 첫 번째 경로 세그먼트 가져오기
+    setActiveTab(path);
+  }, [pathname]);
 
   return (
     <aside className="w-1/12 min-w-[200px] bg-[#FFB7C5] text-white p-4 flex flex-col">
@@ -38,7 +47,6 @@ export default function Navbar() {
                 ? "bg-white text-[#FF6B91]"
                 : "hover:bg-[#FFA3B8]"
             }`}
-            onClick={() => setActiveTab(item.id)}
           >
             {item.icon}
             {item.label}

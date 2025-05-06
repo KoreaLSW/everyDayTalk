@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./Navbar";
-import Sakura from "../component/Sakura";
-import SessionProvider from "./context/SessionProvider";
+import SessionProvider from "@/context/SessionProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="relative flex h-screen bg-[#FDF6E3] overflow-hidden">
-        <Sakura />
+        {/* <Sakura /> */}
         <Navbar />
         <SessionProvider>
           <main className="flex-1 relative z-10">{children}</main>

@@ -1,4 +1,4 @@
-import ProtectedRoute from "@/component/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function ZoomPage() {
   return (
