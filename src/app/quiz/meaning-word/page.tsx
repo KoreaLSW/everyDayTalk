@@ -16,11 +16,11 @@ import QuizLoading from "@/components/quiz/QuizLoading";
 import QuizError from "@/components/quiz/QuizError";
 import QuizNavigation from "@/components/quiz/QuizNavigation";
 import QuizProgress from "@/components/quiz/QuizProgress";
-import QuizQuestion from "@/components/quiz/QuizQuestion";
+import MeaningWordQuizQuestion from "@/components/quiz/MeaningWordQuizQuestion";
 import NextQuestionButton from "@/components/quiz/NextQuestionButton";
 import QuizResult from "@/components/quiz/QuizResult";
 
-export default function WordMeaningQuizPage() {
+export default function MeaningWordQuizPage() {
   const { data: session } = useSession();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
@@ -38,24 +38,23 @@ export default function WordMeaningQuizPage() {
   const [shouldFetch, setShouldFetch] = useState(false);
   // SWR hook 사용
   const { questions, isLoading, isError, loadNewQuiz } = useQuizData(
-    "word-meaning",
+    "meaning-word", // 퀴즈 타입 변경
     session?.user?.id,
     quizSettings,
     shouldFetch
   );
+  console.log("옵션 구조:", questions);
 
   const { updateProgress } = useUpdateWordProgress();
 
   // 로컬 스토리지 키
-  const storageKey = "quizWordMeaning";
+  const storageKey = "quizMeaningWord";
 
   // 컴포넌트 마운트 시 항상 레벨 선택 화면으로 시작
   useEffect(() => {
-    // 기존 상태는 무시하고 항상 레벨 선택 화면으로 초기화
     setQuizState(QuizState.SETTINGS);
     setShouldFetch(false);
 
-    // 로컬 스토리지 설정값만 복원 (있다면)
     try {
       const savedSettings = localStorage.getItem(`${storageKey}_settings`);
       if (savedSettings) {
@@ -76,7 +75,6 @@ export default function WordMeaningQuizPage() {
 
   // 페이지 로드 시 데이터 새로고침
   useEffect(() => {
-    // 페이지가 로드될 때마다 타임스탬프를 추가하여 새로운 데이터를 가져옴
     setShouldFetch(true);
     loadNewQuiz();
   }, []);
@@ -110,18 +108,17 @@ export default function WordMeaningQuizPage() {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
     } else {
-      setQuizState(QuizState.RESULT); // 결과 화면으로 전환
+      setQuizState(QuizState.RESULT);
     }
   };
 
   // 퀴즈 재시작
   const handleRestart = () => {
-    // 상태 초기화
     setCurrentQuestionIndex(0);
     setSelectedOption(null);
     setIsAnswered(false);
     setScore(0);
-    setQuizState(QuizState.SETTINGS); // 레벨 선택 화면으로 돌아감
+    setQuizState(QuizState.SETTINGS);
     setShouldFetch(false);
   };
 
@@ -138,19 +135,12 @@ export default function WordMeaningQuizPage() {
 
   // 퀴즈 시작
   const handleStartQuiz = () => {
-    // 상태 초기화
     setCurrentQuestionIndex(0);
     setScore(0);
     setIsAnswered(false);
     setSelectedOption(null);
-
-    // 퀴즈 로드 활성화
     setShouldFetch(true);
-
-    // 퀴즈 상태를 진행 중으로 변경
     setQuizState(QuizState.PROGRESS);
-
-    // 새 퀴즈 데이터 로드
     loadNewQuiz();
   };
 
@@ -158,7 +148,7 @@ export default function WordMeaningQuizPage() {
     <ProtectedRoute>
       {quizState === QuizState.SETTINGS && (
         <QuizSettings
-          quizName="단어 의미 맞추기"
+          quizName="뜻으로 단어 맞추기"
           settings={quizSettings}
           onSettingsChange={handleSettingsChange}
           onStartQuiz={handleStartQuiz}
@@ -210,7 +200,7 @@ export default function WordMeaningQuizPage() {
               totalQuestions={questions.length}
             />
 
-            <QuizQuestion
+            <MeaningWordQuizQuestion
               question={questions[currentQuestionIndex]}
               selectedOption={selectedOption}
               isAnswered={isAnswered}

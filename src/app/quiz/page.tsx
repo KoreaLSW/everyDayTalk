@@ -1,7 +1,15 @@
 "use client";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { Book, PenBox, Headphones, Trophy, Clock, Target } from "lucide-react";
+import {
+  Book,
+  PenBox,
+  Headphones,
+  Trophy,
+  Clock,
+  Target,
+  Volume2,
+} from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -31,6 +39,12 @@ const quizTypes: QuizType[] = [
     name: "읽기 맞추기",
     description: "한자를 보고 알맞은 읽는 방법을 고르세요",
     icon: <Headphones className="w-6 h-6" />,
+  },
+  {
+    id: "audio-quiz",
+    name: "소리 듣고 맞추기",
+    description: "일본어 발음을 듣고 올바른 단어를 선택하세요",
+    icon: <Volume2 className="w-6 h-6" />,
   },
   {
     id: "time-attack",
@@ -71,6 +85,9 @@ export default function QuizPage() {
         break;
       case "reading":
         router.push("/quiz/reading");
+        break;
+      case "audio-quiz":
+        router.push("/quiz/audio-quiz");
         break;
       default:
         console.log("Invalid quiz type selected");

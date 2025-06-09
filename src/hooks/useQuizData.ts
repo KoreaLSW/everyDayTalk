@@ -53,7 +53,7 @@ export function useQuizData(
       dedupingInterval: 600000, // 10분 동안 중복 요청 방지
     }
   );
-
+  console.log("datazz", data);
   // 다른 단어들에서 무작위로 의미 선택
   const getRandomIncorrectMeanings = (
     allWords: WordType[],
@@ -85,31 +85,112 @@ export function useQuizData(
     return meanings;
   };
 
+  // 다른 단어들에서 무작위로 일본어 단어 선택 (한글->일본어 퀴즈용)
+  const getRandomIncorrectWords = (
+    allWords: WordType[],
+    currentWord: WordType,
+    count: number
+  ): string[] => {
+    const otherWords = allWords.filter(
+      (w) => w.word_id !== currentWord.word_id
+    );
+    const words: string[] = [];
+
+    // 중복 방지를 위한 세트
+    const usedWords = new Set([currentWord.word]);
+
+    while (words.length < count && otherWords.length > 0) {
+      const randomIndex = Math.floor(Math.random() * otherWords.length);
+      const randomWord = otherWords[randomIndex];
+
+      // 해당 단어가 이미 사용되지 않았으면 추가
+      if (!usedWords.has(randomWord.word)) {
+        words.push(`${randomWord.word} (${randomWord.reading})`);
+        usedWords.add(randomWord.word);
+      }
+
+      // 이미 확인한 단어는 제거
+      otherWords.splice(randomIndex, 1);
+    }
+
+    return words;
+  };
+
   // 문제 포맷팅 함수
   const formatQuestions = (words: WordType[]): Question[] => {
     if (!words || words.length === 0) return [];
 
-    return words.map((word) => {
-      // 현재 단어의 올바른 의미를 선택 (여러 의미가 있으면 첫 번째 것 사용)
-      const correctMeaning = word.meanings[0];
+    // 퀴즈 타입에 따라 다른 포맷팅 적용
+    if (quizType === "meaning-word") {
+      // 한글 뜻을 보고 일본어 단어를 맞추는 퀴즈
+      return words.map((word) => {
+        // 현재 단어의 올바른 일본어 단어 (한자 + 읽기)
+        const correctWord = `${word.word} (${word.reading})`;
 
-      // 다른 단어들에서 무작위로 3개의 잘못된 의미 선택
-      const incorrectMeanings = getRandomIncorrectMeanings(words, word, 3);
+        // 다른 단어들에서 무작위로 3개의 잘못된 일본어 단어 선택
+        const incorrectWords = getRandomIncorrectWords(words, word, 3);
 
-      // 4개의 보기 생성 및 섞기
-      const options = [
-        { text: correctMeaning, isCorrect: true },
-        ...incorrectMeanings.map((meaning) => ({
-          text: meaning,
-          isCorrect: false,
-        })),
-      ].sort(() => Math.random() - 0.5);
+        // 4개의 보기 생성 및 섞기
+        const options = [
+          { text: correctWord, isCorrect: true },
+          ...incorrectWords.map((wordText) => ({
+            text: wordText,
+            isCorrect: false,
+          })),
+        ].sort(() => Math.random() - 0.5);
 
-      return {
-        wordInfo: word,
-        options,
-      };
-    });
+        return {
+          wordInfo: word,
+          options,
+        };
+      });
+    } else if (quizType === "audio-quiz") {
+      // 오디오 퀴즈: 일본어 발음을 듣고 올바른 의미를 맞추는 퀴즈
+      return words.map((word) => {
+        // 현재 단어의 올바른 의미를 선택 (여러 의미가 있으면 첫 번째 것 사용)
+        const correctMeaning = word.meanings[0];
+
+        // 다른 단어들에서 무작위로 3개의 잘못된 의미 선택
+        const incorrectMeanings = getRandomIncorrectMeanings(words, word, 3);
+
+        // 4개의 보기 생성 및 섞기
+        const options = [
+          { text: correctMeaning, isCorrect: true },
+          ...incorrectMeanings.map((meaning) => ({
+            text: meaning,
+            isCorrect: false,
+          })),
+        ].sort(() => Math.random() - 0.5);
+
+        return {
+          wordInfo: word,
+          options,
+        };
+      });
+    } else {
+      // 기본: 일본어 단어를 보고 한글 뜻을 맞추는 퀴즈
+      return words.map((word) => {
+        // 현재 단어의 올바른 의미를 선택 (여러 의미가 있으면 첫 번째 것 사용)
+        const correctMeaning = word.meanings[0];
+
+        // 다른 단어들에서 무작위로 3개의 잘못된 의미 선택
+        const incorrectMeanings = getRandomIncorrectMeanings(words, word, 3);
+
+        // 4개의 보기 생성 및 섞기
+        const options = [
+          { text: correctMeaning, isCorrect: true },
+          ...incorrectMeanings.map((meaning) => ({
+            text: meaning,
+            isCorrect: false,
+          })),
+        ].sort(() => Math.random() - 0.5);
+
+        return {
+          wordInfo: word,
+          options,
+        };
+      });
+    }
   };
 
   // 데이터 로드 및 문제 포맷팅
@@ -178,15 +259,13 @@ export function useUpdateWordProgress() {
   ) => {
     if (!userId) return;
 
+    console.log("useUpdateWordProgress 호출", userId, wordId, isCorrect);
+    const status = isCorrect ? "memorized" : "notMemorized";
     try {
       await fetch("/api/words", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
-          word_id: wordId,
-          status: isCorrect ? "memorized" : "notMemorized",
-        }),
+        body: JSON.stringify({ userId, wordId, status }),
       });
       return true;
     } catch (error) {

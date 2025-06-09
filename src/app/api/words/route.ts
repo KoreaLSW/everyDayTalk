@@ -77,6 +77,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { userId, wordId, status } = await req.json();
+    console.log("userId", userId);
+    console.log("wordId", wordId);
+    console.log("status", status);
     if (!userId || !wordId || !status) {
       return NextResponse.json(
         { message: "Missing parameters" },
