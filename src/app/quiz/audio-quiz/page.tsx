@@ -82,6 +82,16 @@ export default function AudioQuizPage() {
         if (voices.length > 0) {
           setVoicesLoaded(true);
           console.log("✅ 음성 목록 로드 완료:", voices.length + "개");
+
+          // 음성 엔진 워밍업 (첫 재생 안정성 향상)
+          setTimeout(() => {
+            console.log("🔥 음성 엔진 워밍업 시작");
+            const warmupUtterance = new SpeechSynthesisUtterance("");
+            warmupUtterance.volume = 0; // 무음으로 실행
+            speechSynthesis.speak(warmupUtterance);
+            speechSynthesis.cancel();
+            console.log("✅ 음성 엔진 워밍업 완료");
+          }, 100);
         }
       };
 
@@ -99,6 +109,16 @@ export default function AudioQuizPage() {
         speechSynthesis.cancel();
       } else {
         setVoicesLoaded(true);
+
+        // 즉시 워밍업 실행
+        setTimeout(() => {
+          console.log("🔥 즉시 음성 엔진 워밍업 시작");
+          const warmupUtterance = new SpeechSynthesisUtterance("");
+          warmupUtterance.volume = 0;
+          speechSynthesis.speak(warmupUtterance);
+          speechSynthesis.cancel();
+          console.log("✅ 즉시 음성 엔진 워밍업 완료");
+        }, 100);
       }
 
       return () => {
@@ -232,7 +252,22 @@ export default function AudioQuizPage() {
       return;
     }
 
-    startSpeaking(text, speed);
+    // 첫 재생 전 추가 워밍업 (더 안정적인 재생을 위해)
+    try {
+      console.log("🔥 재생 직전 워밍업 시작");
+      const quickWarmup = new SpeechSynthesisUtterance("");
+      quickWarmup.volume = 0;
+      speechSynthesis.speak(quickWarmup);
+      speechSynthesis.cancel();
+
+      // 짧은 지연 후 실제 재생
+      setTimeout(() => {
+        startSpeaking(text, speed);
+      }, 50);
+    } catch (error) {
+      console.warn("⚠️ 워밍업 실패, 바로 재생 시도:", error);
+      startSpeaking(text, speed);
+    }
   };
 
   // 음성 엔진 재시작 함수
@@ -483,14 +518,31 @@ export default function AudioQuizPage() {
 
           // 첫 번째 시도라면 재시도
           if (!firstPlayFailed) {
-            console.log("🔄 첫 재생 실패로 판단 - 1초 후 재시도");
+            console.log("🔄 첫 재생 실패로 판단 - 더 강력한 재시도");
             firstPlayFailed = true;
             handlePlayingEnd();
 
+            // 음성 엔진 완전 리셋 후 재시도
             setTimeout(() => {
-              console.log("🔄 500ms 체크 후 자동 재시도 실행");
-              startSpeaking(text, speed);
-            }, 1000);
+              if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+              }
+
+              // 추가 워밍업
+              try {
+                const retryWarmup = new SpeechSynthesisUtterance("");
+                retryWarmup.volume = 0;
+                speechSynthesis.speak(retryWarmup);
+                speechSynthesis.cancel();
+              } catch (e) {
+                console.warn("재시도 워밍업 실패:", e);
+              }
+
+              setTimeout(() => {
+                console.log("🔄 500ms 체크 후 강화된 자동 재시도 실행");
+                startSpeaking(text, speed);
+              }, 200);
+            }, 800);
             return;
           } else {
             console.warn("⚠️ 재시도도 실패 - 즉시 중지");
