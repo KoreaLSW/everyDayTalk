@@ -36,7 +36,9 @@ export default function Navbar() {
 
   return (
     <aside className="w-1/12 min-w-[200px] bg-[#FFB7C5] text-white p-4 flex flex-col">
-      <h1 className="text-2xl font-bold mb-4 text-center">🗻 EveryDayTalk</h1>
+      <Link href="/" className="block">
+        <h1 className="text-2xl font-bold mb-4 text-center">🗻 EveryDayTalk</h1>
+      </Link>
       <nav className="space-y-2">
         {menuItems.map((item) => (
           <Link

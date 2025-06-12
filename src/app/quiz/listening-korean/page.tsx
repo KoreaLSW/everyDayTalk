@@ -42,10 +42,11 @@ export default function AudioQuizPage() {
   // DB에서 데이터 로드 (useQuizData 훅 사용)
   const [shouldFetch, setShouldFetch] = useState(false);
   const { questions, isLoading, isError, loadNewQuiz } = useQuizData(
-    "audio-quiz", // 퀴즈 타입
+    "listening-korean", // 퀴즈 타입 변경
     session?.user?.id,
     quizSettings,
-    shouldFetch
+    shouldFetch,
+    false // 한글 옵션 사용
   );
 
   const { updateProgress } = useUpdateWordProgress();
@@ -623,96 +624,99 @@ export default function AudioQuizPage() {
   // 렌더링 로직
   return (
     <ProtectedRoute>
-      {/* 설정 화면 */}
-      {quizState === QuizState.SETTINGS && (
-        <AudioQuizSettings
-          settings={quizSettings}
-          onSettingsChange={handleSettingsChange}
-          onStartQuiz={handleStartQuiz}
-          onBack={handleBackToMenu}
-        />
-      )}
+      <div className="h-screen overflow-y-auto">
+        {/* 설정 화면 */}
+        {quizState === QuizState.SETTINGS && (
+          <AudioQuizSettings
+            settings={quizSettings}
+            onSettingsChange={handleSettingsChange}
+            onStartQuiz={handleStartQuiz}
+            onBack={handleBackToMenu}
+          />
+        )}
 
-      {/* 결과 화면 */}
-      {quizState === QuizState.RESULT && (
-        <AudioQuizResult
-          score={score}
-          totalQuestions={questions.length}
-          onRestart={handleRestart}
-          onBackToMenu={handleBackToMenu}
-        />
-      )}
+        {/* 결과 화면 */}
+        {quizState === QuizState.RESULT && (
+          <AudioQuizResult
+            score={score}
+            totalQuestions={questions.length}
+            onRestart={handleRestart}
+            onBackToMenu={handleBackToMenu}
+          />
+        )}
 
-      {/* 로딩 화면 */}
-      {quizState === QuizState.PROGRESS && isLoading && <LoadingSpinner />}
+        {/* 로딩 화면 */}
+        {quizState === QuizState.PROGRESS && isLoading && <LoadingSpinner />}
 
-      {/* 에러 화면 */}
-      {quizState === QuizState.PROGRESS && isError && (
-        <div className="p-8 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[60vh]">
-          <p className="text-red-600 mb-4">
-            문제를 불러오는데 실패했습니다. 다시 시도해주세요.
-          </p>
-          <button
-            className="px-4 py-2 bg-[#FFB7C5] text-white rounded-lg hover:bg-[#FF9CAE] transition-colors"
-            onClick={() => {
-              setShouldFetch(true);
-              loadNewQuiz();
-            }}
-          >
-            다시 시도
-          </button>
-        </div>
-      )}
-
-      {/* 문제 없음 화면 */}
-      {quizState === QuizState.PROGRESS &&
-        !isLoading &&
-        !isError &&
-        questions.length === 0 && (
+        {/* 에러 화면 */}
+        {quizState === QuizState.PROGRESS && isError && (
           <div className="p-8 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[60vh]">
-            <p className="text-gray-600 mb-4">
-              문제를 불러올 수 없습니다. 다시 시도해주세요.
+            <p className="text-red-600 mb-4">
+              문제를 불러오는데 실패했습니다. 다시 시도해주세요.
             </p>
             <button
               className="px-4 py-2 bg-[#FFB7C5] text-white rounded-lg hover:bg-[#FF9CAE] transition-colors"
-              onClick={() => setQuizState(QuizState.SETTINGS)}
+              onClick={() => {
+                setShouldFetch(true);
+                loadNewQuiz();
+              }}
             >
-              레벨 선택으로 돌아가기
+              다시 시도
             </button>
           </div>
         )}
 
-      {/* 브라우저 호환성 체크 */}
-      {quizState === QuizState.PROGRESS &&
-        !isLoading &&
-        !isError &&
-        questions.length > 0 &&
-        !canSpeak && <BrowserCompatibility onBackToMenu={handleBackToMenu} />}
+        {/* 문제 없음 화면 */}
+        {quizState === QuizState.PROGRESS &&
+          !isLoading &&
+          !isError &&
+          questions.length === 0 && (
+            <div className="p-8 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[60vh]">
+              <p className="text-gray-600 mb-4">
+                문제를 불러올 수 없습니다. 다시 시도해주세요.
+              </p>
+              <button
+                className="px-4 py-2 bg-[#FFB7C5] text-white rounded-lg hover:bg-[#FF9CAE] transition-colors"
+                onClick={() => setQuizState(QuizState.SETTINGS)}
+              >
+                레벨 선택으로 돌아가기
+              </button>
+            </div>
+          )}
 
-      {/* 퀴즈 진행 화면 */}
-      {quizState === QuizState.PROGRESS &&
-        !isLoading &&
-        !isError &&
-        canSpeak &&
-        questions.length > 0 && (
-          <AudioQuizProgress
-            currentQuestion={questions[currentQuestionIndex]}
-            currentQuestionIndex={currentQuestionIndex}
-            totalQuestions={questions.length}
-            score={score}
-            options={questions[currentQuestionIndex].options}
-            selectedAnswer={selectedAnswer}
-            showResult={showResult}
-            settings={quizSettings}
-            isPlaying={isPlaying}
-            canSpeak={canSpeak}
-            onAnswerSelect={handleAnswerSelect}
-            onNextQuestion={handleNextQuestion}
-            onRestart={handleRestart}
-            onSpeak={speakJapanese}
-            onStopSpeaking={stopSpeaking}
-          />
-        )}
+        {/* 브라우저 호환성 체크 */}
+        {quizState === QuizState.PROGRESS &&
+          !isLoading &&
+          !isError &&
+          questions.length > 0 &&
+          !canSpeak && <BrowserCompatibility onBackToMenu={handleBackToMenu} />}
+
+        {/* 퀴즈 진행 화면 */}
+        {quizState === QuizState.PROGRESS &&
+          !isLoading &&
+          !isError &&
+          canSpeak &&
+          questions.length > 0 && (
+            <AudioQuizProgress
+              currentQuestion={questions[currentQuestionIndex]}
+              currentQuestionIndex={currentQuestionIndex}
+              totalQuestions={questions.length}
+              score={score}
+              options={questions[currentQuestionIndex].options}
+              selectedAnswer={selectedAnswer}
+              showResult={showResult}
+              settings={quizSettings}
+              isPlaying={isPlaying}
+              canSpeak={canSpeak}
+              onAnswerSelect={handleAnswerSelect}
+              onNextQuestion={handleNextQuestion}
+              onRestart={handleRestart}
+              onSpeak={speakJapanese}
+              onStopSpeaking={stopSpeaking}
+              wordInfo={questions[currentQuestionIndex].wordInfo}
+            />
+          )}
+      </div>
     </ProtectedRoute>
   );
 }

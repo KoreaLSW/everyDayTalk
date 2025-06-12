@@ -19,15 +19,17 @@ export default function AudioQuizProgress({
   onRestart,
   onSpeak,
   onStopSpeaking,
+  wordInfo,
+  QuestionOptionsComponent = QuestionOptions,
+  title = "소리 듣고 맞추기",
+  description = "일본어 발음을 듣고 올바른 단어를 선택하세요",
 }: AudioQuizProgressProps) {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       {/* 헤더 및 진행 상황 */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">소리 듣고 맞추기</h1>
-        <p className="text-gray-600">
-          일본어 발음을 듣고 올바른 단어를 선택하세요
-        </p>
+        <h1 className="text-3xl font-bold mb-2">{title}</h1>
+        <p className="text-gray-600">{description}</p>
         <div className="mt-4 flex justify-center gap-4 text-sm">
           <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
             {currentQuestionIndex + 1} / {totalQuestions}
@@ -52,7 +54,7 @@ export default function AudioQuizProgress({
         />
 
         {/* 선택지 */}
-        <QuestionOptions
+        <QuestionOptionsComponent
           options={options}
           selectedAnswer={selectedAnswer}
           showResult={showResult}
@@ -74,6 +76,19 @@ export default function AudioQuizProgress({
                   <p className="text-lg font-semibold">틀렸습니다 😅</p>
                 </div>
               )}
+              
+              {/* 정답 정보 표시 */}
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <div className="text-xl font-bold mb-2">
+                  {wordInfo.word}
+                  <span className="ml-2 text-gray-600">
+                    ({wordInfo.reading})
+                  </span>
+                </div>
+                <div className="text-gray-600">
+                  {wordInfo.meanings.join(", ")}
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-center gap-4">

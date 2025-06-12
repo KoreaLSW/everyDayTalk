@@ -5,6 +5,9 @@ import { WordType } from "@/types/words";
 export interface Option {
   text: string;
   isCorrect: boolean;
+  word?: string;    // 한자 표시용
+  reading?: string; // 읽는 방법 표시용
+  meaning?: string; // 의미 표시용
 }
 
 export interface Question {
@@ -29,18 +32,19 @@ const fetcher = async (url: string) => {
 export function useQuizData(
   quizType: string,
   userId: string | undefined,
-  quizSettings: QuizSettings,
-  shouldFetch: boolean = true
+  settings: { level: string; questionCount: number },
+  shouldFetch: boolean,
+  useKanji: boolean = false // 한자 사용 여부 (기본값: false)
 ) {
   // 캐시 키 (로컬 스토리지에 저장할 고유 식별자)
-  const cacheKey = `quiz_${quizType}_${quizSettings.level}_${quizSettings.questionCount}`;
+  const cacheKey = `quiz_${quizType}_${settings.level}_${settings.questionCount}`;
   const [questions, setQuestions] = useState<Question[]>([]);
   const [formattedQuestions, setFormattedQuestions] = useState<Question[]>([]);
 
   // SWR 키 생성 (shouldFetch가 false면 null을 전달하여 요청하지 않음)
   const key =
     shouldFetch && userId
-      ? `/api/quiz/questions?type=${quizType}&level=${quizSettings.level}&count=${quizSettings.questionCount}&user_id=${userId}`
+      ? `/api/quiz/questions?type=${quizType}&level=${settings.level}&count=${settings.questionCount}&user_id=${userId}`
       : null;
 
   // SWR로 데이터 가져오기
@@ -85,16 +89,16 @@ export function useQuizData(
     return meanings;
   };
 
-  // 다른 단어들에서 무작위로 일본어 단어 선택 (한글->일본어 퀴즈용)
+  // 다른 단어들에서 무작위로 일본어 단어 선택 (오디오->한자 퀴즈용)
   const getRandomIncorrectWords = (
     allWords: WordType[],
     currentWord: WordType,
     count: number
-  ): string[] => {
+  ): WordType[] => {
     const otherWords = allWords.filter(
       (w) => w.word_id !== currentWord.word_id
     );
-    const words: string[] = [];
+    const words: WordType[] = [];
 
     // 중복 방지를 위한 세트
     const usedWords = new Set([currentWord.word]);
@@ -105,7 +109,7 @@ export function useQuizData(
 
       // 해당 단어가 이미 사용되지 않았으면 추가
       if (!usedWords.has(randomWord.word)) {
-        words.push(`${randomWord.word} (${randomWord.reading})`);
+        words.push(randomWord);
         usedWords.add(randomWord.word);
       }
 
@@ -134,7 +138,7 @@ export function useQuizData(
         const options = [
           { text: correctWord, isCorrect: true },
           ...incorrectWords.map((wordText) => ({
-            text: wordText,
+            text: wordText.word,
             isCorrect: false,
           })),
         ].sort(() => Math.random() - 0.5);
@@ -144,21 +148,27 @@ export function useQuizData(
           options,
         };
       });
-    } else if (quizType === "audio-quiz") {
-      // 오디오 퀴즈: 일본어 발음을 듣고 올바른 의미를 맞추는 퀴즈
+    } else if (quizType === "listening-kanji") {
+      // 오디오 퀴즈: 일본어 발음을 듣고 올바른 한자를 맞추는 퀴즈
       return words.map((word) => {
-        // 현재 단어의 올바른 의미를 선택 (여러 의미가 있으면 첫 번째 것 사용)
-        const correctMeaning = word.meanings[0];
-
-        // 다른 단어들에서 무작위로 3개의 잘못된 의미 선택
-        const incorrectMeanings = getRandomIncorrectMeanings(words, word, 3);
+        // 다른 단어들에서 무작위로 3개의 잘못된 단어 선택
+        const incorrectWords = getRandomIncorrectWords(words, word, 3);
 
         // 4개의 보기 생성 및 섞기
         const options = [
-          { text: correctMeaning, isCorrect: true },
-          ...incorrectMeanings.map((meaning) => ({
-            text: meaning,
+          {
+            text: word.word,
+            isCorrect: true,
+            word: word.word,
+            reading: word.reading,
+            meaning: word.meanings[0]
+          },
+          ...incorrectWords.map((incorrectWord) => ({
+            text: incorrectWord.word,
             isCorrect: false,
+            word: incorrectWord.word,
+            reading: incorrectWord.reading,
+            meaning: incorrectWord.meanings[0]
           })),
         ].sort(() => Math.random() - 0.5);
 

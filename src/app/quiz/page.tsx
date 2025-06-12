@@ -35,16 +35,16 @@ const quizTypes: QuizType[] = [
     icon: <PenBox className="w-6 h-6" />,
   },
   {
-    id: "reading",
-    name: "읽기 맞추기",
-    description: "한자를 보고 알맞은 읽는 방법을 고르세요",
-    icon: <Headphones className="w-6 h-6" />,
+    id: "listening-korean",
+    name: "소리 듣고 한글 맞추기",
+    description: "일본어 발음을 듣고 올바른 한글 단어를 선택하세요",
+    icon: <Volume2 className="w-6 h-6" />,
   },
   {
-    id: "audio-quiz",
-    name: "소리 듣고 맞추기",
-    description: "일본어 발음을 듣고 올바른 단어를 선택하세요",
-    icon: <Volume2 className="w-6 h-6" />,
+    id: "listening-kanji",
+    name: "소리 듣고 한자 맞추기",
+    description: "일본어 발음을 듣고 올바른 한자를 선택하세요",
+    icon: <Headphones className="w-6 h-6" />,
   },
   {
     id: "time-attack",
@@ -83,11 +83,11 @@ export default function QuizPage() {
       case "meaning-word":
         router.push("/quiz/meaning-word");
         break;
-      case "reading":
-        router.push("/quiz/reading");
+      case "listening-korean":
+        router.push("/quiz/listening-korean");
         break;
-      case "audio-quiz":
-        router.push("/quiz/audio-quiz");
+      case "listening-kanji":
+        router.push("/quiz/listening-kanji");
         break;
       default:
         console.log("Invalid quiz type selected");

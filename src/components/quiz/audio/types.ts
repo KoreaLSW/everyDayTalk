@@ -58,6 +58,16 @@ export interface AudioQuizProgressProps {
   onRestart: () => void;
   onSpeak: (text: string, speed?: number) => void;
   onStopSpeaking: () => void;
+  wordInfo: {
+    word_id: string;
+    word: string;
+    reading: string;
+    meanings: string[];
+    kanji?: string;
+  };
+  QuestionOptionsComponent?: React.ComponentType<QuestionOptionsProps>;
+  title?: string;
+  description?: string;
 }
 
 export interface AudioQuizSettingsProps {
